@@ -1,0 +1,718 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Quadratzahlen und Wurzeln üben</title>
+<style>
+  :root {
+    color-scheme: light dark;
+    --paper: #f5f9fc;
+    --grid: #d3e3f1;
+    --sheet: #ffffff;
+    --ink: #12263f;
+    --muted: #5b6b7e;
+    --accent: #1e56d8;
+    --accent-ink: #ffffff;
+    --accent-soft: #dfe8fb;
+    --good: #138a5b;
+    --good-bg: #dff3ea;
+    --bad: #c8372d;
+    --bad-bg: #fbe5e3;
+    --margin: #e8838a;
+    --marker: #ffe66d;
+    --line: #c5d5e5;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --paper: #0f1a26;
+      --grid: #1c2d40;
+      --sheet: #16263a;
+      --ink: #e8eef5;
+      --muted: #9fb0c4;
+      --accent: #6e97ff;
+      --accent-ink: #0b1626;
+      --accent-soft: #223a63;
+      --good: #4cc790;
+      --good-bg: #153a2c;
+      --bad: #ff8a80;
+      --bad-bg: #44211f;
+      --margin: #b05a62;
+      --marker: #6b5d12;
+      --line: #2c4560;
+    }
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; }
+  body {
+    min-height: 100vh;
+    font-family: "Segoe UI", "Helvetica Neue", Arial, system-ui, sans-serif;
+    color: var(--ink);
+    background-color: var(--paper);
+    background-image:
+      linear-gradient(var(--grid) 1px, transparent 1px),
+      linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+    background-size: 24px 24px;
+    line-height: 1.5;
+  }
+  main {
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 28px 16px 56px;
+  }
+  [hidden] { display: none !important; }
+  h1 {
+    font-size: clamp(1.9rem, 6vw, 2.6rem);
+    line-height: 1.1;
+    margin: 0 0 6px;
+    letter-spacing: -0.02em;
+  }
+  h2 { font-size: 1.15rem; margin: 0 0 10px; }
+  p { margin: 0 0 12px; }
+  .lead { color: var(--muted); font-size: 1.05rem; margin-bottom: 22px; }
+
+  /* Heftseite mit Korrekturrand */
+  .sheet {
+    position: relative;
+    background: var(--sheet);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    padding: 22px 20px 22px 44px;
+    box-shadow: 0 2px 0 var(--line);
+  }
+  .sheet::before {
+    content: "";
+    position: absolute;
+    top: 0; bottom: 0; left: 28px;
+    width: 2px;
+    background: var(--margin);
+    opacity: .8;
+  }
+
+  fieldset { border: 0; padding: 0; margin: 0 0 20px; }
+  legend { font-weight: 700; padding: 0; margin-bottom: 8px; }
+  .choices { display: flex; flex-wrap: wrap; gap: 8px; }
+  .choice {
+    font: inherit;
+    font-weight: 600;
+    color: var(--ink);
+    background: transparent;
+    border: 2px solid var(--line);
+    border-radius: 8px;
+    padding: 9px 14px;
+    cursor: pointer;
+    min-height: 44px;
+  }
+  .choice[aria-pressed="true"] {
+    background: var(--accent-soft);
+    border-color: var(--accent);
+  }
+  .choice small { display: block; font-weight: 400; color: var(--muted); font-size: .8rem; }
+
+  button { font: inherit; }
+  :focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+
+  .primary {
+    font-weight: 700;
+    font-size: 1.05rem;
+    color: var(--accent-ink);
+    background: var(--accent);
+    border: 0;
+    border-radius: 8px;
+    padding: 12px 22px;
+    min-height: 48px;
+    cursor: pointer;
+  }
+  .primary:hover { filter: brightness(1.08); }
+  .secondary {
+    font-weight: 600;
+    color: var(--ink);
+    background: transparent;
+    border: 2px solid var(--line);
+    border-radius: 8px;
+    padding: 10px 18px;
+    min-height: 48px;
+    cursor: pointer;
+  }
+  .secondary:hover { border-color: var(--accent); }
+  .row { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 16px; }
+
+  details { margin-top: 22px; }
+  summary { cursor: pointer; font-weight: 600; }
+  .table {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(92px, 1fr));
+    gap: 6px;
+    margin-top: 12px;
+    font-variant-numeric: tabular-nums;
+  }
+  .table div {
+    background: var(--accent-soft);
+    border-radius: 6px;
+    padding: 4px 8px;
+    font-size: .95rem;
+    white-space: nowrap;
+  }
+
+  /* Spielansicht */
+  .topbar {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+    font-weight: 600;
+    margin-bottom: 8px;
+    font-variant-numeric: tabular-nums;
+  }
+  .topbar span { color: var(--muted); font-weight: 400; }
+  .progress {
+    height: 8px;
+    background: var(--line);
+    border-radius: 99px;
+    overflow: hidden;
+    margin-bottom: 14px;
+  }
+  .progress > div {
+    height: 100%;
+    width: 0;
+    background: var(--accent);
+    transition: width .25s ease;
+  }
+  .question {
+    font-size: clamp(3rem, 15vw, 5rem);
+    font-weight: 800;
+    line-height: 1.15;
+    letter-spacing: -0.02em;
+    margin: 4px 0 14px;
+    font-variant-numeric: tabular-nums;
+  }
+  .question.long { font-size: clamp(1.8rem, 8.5vw, 3rem); }
+  .question .eq { color: var(--muted); font-weight: 600; }
+  .hint { color: var(--muted); font-size: .95rem; margin: 10px 0 0; }
+  .explain.text { display: block; }
+  .explain.text p { font-variant-numeric: tabular-nums; }
+  .rad { display: inline-flex; align-items: flex-start; }
+  .rad-n {
+    border-top: .075em solid currentColor;
+    padding: 0 .12em;
+    margin-left: .02em;
+  }
+  .answer-row { display: flex; gap: 10px; flex-wrap: wrap; align-items: stretch; }
+  input[type="text"] {
+    font: inherit;
+    font-size: 1.8rem;
+    font-weight: 700;
+    width: 160px;
+    padding: 8px 12px;
+    color: var(--ink);
+    background: var(--paper);
+    border: 3px solid var(--line);
+    border-radius: 8px;
+    font-variant-numeric: tabular-nums;
+  }
+  input[type="text"]:focus { border-color: var(--accent); outline: none; }
+  input[type="text"]:disabled { opacity: .7; }
+
+  .feedback {
+    margin-top: 16px;
+    min-height: 3.2em;
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-weight: 600;
+  }
+  .feedback.good { background: var(--good-bg); color: var(--good); }
+  .feedback.bad { background: var(--bad-bg); color: var(--bad); }
+  .feedback.empty { visibility: hidden; }
+  .explain {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-top: 12px;
+    color: var(--ink);
+    font-weight: 400;
+  }
+  .explain svg { flex: none; width: 96px; height: 96px; border: 2px solid var(--ink); background: var(--marker); }
+  .explain p { margin: 0; }
+
+  /* Ergebnis */
+  .score {
+    font-size: clamp(3rem, 14vw, 4.6rem);
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    line-height: 1.1;
+    margin: 0 0 4px;
+  }
+  .score span { color: var(--muted); font-weight: 600; font-size: .5em; }
+  .badge {
+    display: inline-block;
+    background: var(--marker);
+    color: var(--ink);
+    padding: 2px 10px;
+    border-radius: 4px;
+    font-weight: 700;
+    margin-bottom: 12px;
+  }
+  .mistakes { list-style: none; padding: 0; margin: 10px 0 0; }
+  .mistakes li {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--line);
+    font-variant-numeric: tabular-nums;
+  }
+  .mistakes .given { color: var(--bad); text-decoration: line-through; }
+  .mistakes .right { color: var(--good); font-weight: 700; }
+
+  @media (max-width: 420px) {
+    .sheet { padding: 18px 14px 18px 38px; }
+    .sheet::before { left: 22px; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .progress > div { transition: none; }
+  }
+</style>
+</head>
+<body>
+<main>
+
+  <!-- Startseite -->
+  <section id="menu">
+    <h1>Quadratzahlen und Wurzeln</h1>
+    <p class="lead">Wähle aus, was du üben möchtest, und starte eine Runde.</p>
+
+    <div class="sheet">
+      <fieldset>
+        <legend>Aufgabenart</legend>
+        <div class="choices" data-group="mode">
+          <button type="button" class="choice" data-value="square" aria-pressed="true">Quadrieren<small>7² = ?</small></button>
+          <button type="button" class="choice" data-value="root" aria-pressed="false">Wurzel ziehen<small>√49 = ?</small></button>
+          <button type="button" class="choice" data-value="mixed" aria-pressed="false">Gemischt<small>beides</small></button>
+          <button type="button" class="choice" data-value="tricks" aria-pressed="false">Rechentricks<small>√3 · √75 = ?</small></button>
+        </div>
+      </fieldset>
+
+      <fieldset id="levelSet" hidden>
+        <legend>Schwierigkeit</legend>
+        <div class="choices" data-group="level">
+          <button type="button" class="choice" data-value="1" aria-pressed="true">Leicht<small>√3 · √75 oder √75 : √3</small></button>
+          <button type="button" class="choice" data-value="2" aria-pressed="false">Mittel<small>√8 · √18</small></button>
+        </div>
+        <p class="hint">Tipp: Zerlege eine Wurzel so, dass du √3 · √3 = 3 nutzen kannst. Zum Beispiel ist √75 = √3 · √25.</p>
+      </fieldset>
+
+      <fieldset id="maxSet">
+        <legend>Zahlen von 1 bis …</legend>
+        <div class="choices" data-group="max">
+          <button type="button" class="choice" data-value="10" aria-pressed="false">10</button>
+          <button type="button" class="choice" data-value="15" aria-pressed="false">15</button>
+          <button type="button" class="choice" data-value="20" aria-pressed="false">20</button>
+          <button type="button" class="choice" data-value="25" aria-pressed="true">25</button>
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend>Anzahl Aufgaben</legend>
+        <div class="choices" data-group="count">
+          <button type="button" class="choice" data-value="10" aria-pressed="true">10</button>
+          <button type="button" class="choice" data-value="20" aria-pressed="false">20</button>
+          <button type="button" class="choice" data-value="30" aria-pressed="false">30</button>
+        </div>
+      </fieldset>
+
+      <button type="button" class="primary" id="startBtn">Runde starten</button>
+      <p id="bestInfo" class="lead" style="margin:14px 0 0; font-size:.95rem;"></p>
+
+      <details>
+        <summary>Tabelle zum Nachschauen</summary>
+        <div class="table" id="table"></div>
+      </details>
+    </div>
+  </section>
+
+  <!-- Spiel -->
+  <section id="game" hidden>
+    <div class="sheet">
+      <div class="topbar">
+        <div>Aufgabe <b id="qNum">1</b> von <b id="qTotal">10</b></div>
+        <div><span>Richtig:</span> <b id="scoreNow">0</b></div>
+        <div><span>Serie:</span> <b id="streakNow">0</b></div>
+        <div><span>Zeit:</span> <b id="timeNow">0:00</b></div>
+      </div>
+      <div class="progress" aria-hidden="true"><div id="bar"></div></div>
+
+      <div class="question" id="qText" aria-live="polite"></div>
+
+      <form id="answerForm" autocomplete="off">
+        <div class="answer-row">
+          <label for="answer" class="sr" style="position:absolute;left:-9999px;">Deine Antwort</label>
+          <input type="text" id="answer" inputmode="numeric" pattern="[0-9]*" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="?">
+          <button type="submit" class="primary" id="submitBtn">Prüfen</button>
+        </div>
+      </form>
+
+      <div class="feedback empty" id="feedback" role="status" aria-live="polite"></div>
+
+      <div class="row">
+        <button type="button" class="secondary" id="quitBtn">Abbrechen</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Ergebnis -->
+  <section id="result" hidden>
+    <div class="sheet">
+      <h2>Runde geschafft</h2>
+      <p class="score"><b id="resScore">0</b><span> von <b id="resTotal">0</b> richtig</span></p>
+      <div class="badge" id="resBadge" hidden></div>
+      <p id="resMsg"></p>
+      <p style="color:var(--muted)">Zeit: <b id="resTime"></b> · Längste Serie: <b id="resStreak"></b></p>
+
+      <div id="mistakeBox" hidden>
+        <h2>Das solltest du nochmal anschauen</h2>
+        <ul class="mistakes" id="mistakes"></ul>
+      </div>
+
+      <div class="row">
+        <button type="button" class="primary" id="againBtn">Nochmal</button>
+        <button type="button" class="secondary" id="retryBtn" hidden>Fehler üben</button>
+        <button type="button" class="secondary" id="menuBtn">Zur Auswahl</button>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<script>
+(function () {
+  "use strict";
+
+  var $ = function (s) { return document.querySelector(s); };
+  var screens = { menu: $("#menu"), game: $("#game"), result: $("#result") };
+  function show(name) {
+    for (var k in screens) screens[k].hidden = (k !== name);
+    window.scrollTo(0, 0);
+  }
+
+  var cfg = { mode: "square", max: 25, count: 10, level: 1 };
+
+  function updateSets() {
+    var t = cfg.mode === "tricks";
+    $("#levelSet").hidden = !t;
+    $("#maxSet").hidden = t;
+  }
+
+  /* Tabelle zum Nachschauen */
+  var tableEl = $("#table");
+  for (var i = 1; i <= 25; i++) {
+    var d = document.createElement("div");
+    d.textContent = i + "² = " + (i * i);
+    tableEl.appendChild(d);
+  }
+
+  /* Auswahlgruppen */
+  document.querySelectorAll(".choices").forEach(function (group) {
+    group.addEventListener("click", function (e) {
+      var btn = e.target.closest(".choice");
+      if (!btn) return;
+      group.querySelectorAll(".choice").forEach(function (b) {
+        b.setAttribute("aria-pressed", b === btn ? "true" : "false");
+      });
+      var key = group.getAttribute("data-group");
+      var val = btn.getAttribute("data-value");
+      cfg[key] = (key === "mode") ? val : parseInt(val, 10);
+      updateSets();
+      showBest();
+    });
+  });
+
+  /* Bestleistung (nur lokal im Browser, falls verfügbar) */
+  function bestKey() {
+    if (cfg.mode === "tricks") return "qw-best-tricks-" + cfg.level + "-" + cfg.count;
+    return "qw-best-" + cfg.mode + "-" + cfg.max + "-" + cfg.count;
+  }
+  function loadBest() {
+    try { var v = localStorage.getItem(bestKey()); return v ? JSON.parse(v) : null; }
+    catch (e) { return null; }
+  }
+  function saveBest(b) {
+    try { localStorage.setItem(bestKey(), JSON.stringify(b)); } catch (e) {}
+  }
+  function showBest() {
+    var b = loadBest();
+    $("#bestInfo").textContent = b
+      ? "Dein Bestwert hier: " + b.score + " von " + cfg.count + " richtig in " + fmt(b.time) + "."
+      : "";
+  }
+
+  function fmt(sec) {
+    var m = Math.floor(sec / 60), s = sec % 60;
+    return m + ":" + (s < 10 ? "0" : "") + s;
+  }
+
+  function shuffle(a) {
+    for (var i = a.length - 1; i > 0; i--) {
+      var j = Math.floor(Math.random() * (i + 1));
+      var t = a[i]; a[i] = a[j]; a[j] = t;
+    }
+    return a;
+  }
+
+  function pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+
+  /* Rechentricks: Ergebnis ist immer eine ganze Zahl */
+  function makeTrick() {
+    var primes = [2, 3, 5, 6, 7, 10];
+    var p = pick(primes), a, b, ans, op, how;
+    if (cfg.level === 1) {
+      var k = pick([2, 3, 4, 5, 6]);
+      var big = p * k * k;
+      if (Math.random() < 0.65) {
+        op = "mul";
+        a = p; b = big; ans = p * k;
+        if (Math.random() < 0.5) { var t = a; a = b; b = t; }
+        how = "√" + p + " · √" + big + " = √" + p + " · √" + p + " · √" + (k * k) +
+              " = " + p + " · " + k + " = " + ans;
+      } else {
+        op = "div";
+        a = big; b = p; ans = k;
+        how = "√" + big + " : √" + p + " = √(" + big + " : " + p + ") = √" + (k * k) + " = " + k;
+      }
+    } else {
+      var q = pick([2, 3, 4, 5]), r = pick([2, 3, 4, 5]);
+      a = p * q * q; b = p * r * r; ans = p * q * r;
+      op = "mul";
+      how = "√" + a + " · √" + b + " = √" + p + " · √" + (q * q) + " · √" + p + " · √" + (r * r) +
+            " = " + p + " · " + q + " · " + r + " = " + ans;
+    }
+    if (ans > 100) return makeTrick();
+    return { type: "trick", op: op, a: a, b: b, ans: ans, how: how, key: op + a + "_" + b };
+  }
+
+  function buildTricks() {
+    var list = [], seen = {}, tries = 0;
+    while (list.length < cfg.count) {
+      var t = makeTrick();
+      tries++;
+      if (seen[t.key] && tries < 400) continue;
+      seen[t.key] = true;
+      list.push(t);
+    }
+    return list;
+  }
+
+  function buildQuestions() {
+    if (cfg.mode === "tricks") return buildTricks();
+    var qs = [], pool = [], last = -1;
+    while (qs.length < cfg.count) {
+      if (!pool.length) {
+        for (var i = 1; i <= cfg.max; i++) pool.push(i);
+        shuffle(pool);
+        if (pool[pool.length - 1] === last && pool.length > 1) pool.unshift(pool.pop());
+      }
+      var n = pool.pop();
+      last = n;
+      var type = cfg.mode === "mixed" ? (Math.random() < 0.5 ? "square" : "root") : cfg.mode;
+      qs.push({ n: n, type: type });
+    }
+    return qs;
+  }
+
+  /* Spielzustand */
+  var qs, idx, score, streak, bestStreak, answered, wrong, startTime, timerId, nextId, retryMode;
+
+  function startRound(list) {
+    qs = list;
+    idx = 0; score = 0; streak = 0; bestStreak = 0; wrong = [];
+    answered = false;
+    startTime = Date.now();
+    clearInterval(timerId);
+    timerId = setInterval(tick, 500);
+    $("#qTotal").textContent = qs.length;
+    show("game");
+    renderQuestion();
+  }
+
+  function tick() {
+    $("#timeNow").textContent = fmt(Math.floor((Date.now() - startTime) / 1000));
+  }
+
+  function radHTML(x) {
+    return "<span class=\"rad\">√<span class=\"rad-n\">" + x + "</span></span>";
+  }
+  function qHTML(q) {
+    if (q.type === "trick") {
+      var opSign = q.op === "mul" ? " · " : " : ";
+      return radHTML(q.a) + opSign + radHTML(q.b) + " <span class=\"eq\">=</span> ?";
+    }
+    if (q.type === "square") {
+      return q.n + "<sup>2</sup> <span class=\"eq\">=</span> ?";
+    }
+    return radHTML(q.n * q.n) + " <span class=\"eq\">=</span> ?";
+  }
+  function qPlain(q) {
+    if (q.type === "trick") return "√" + q.a + (q.op === "mul" ? " · " : " : ") + "√" + q.b;
+    return q.type === "square" ? q.n + "²" : "√" + (q.n * q.n);
+  }
+  function answerOf(q) {
+    if (q.type === "trick") return q.ans;
+    return q.type === "square" ? q.n * q.n : q.n;
+  }
+
+  function renderQuestion() {
+    clearTimeout(nextId);
+    answered = false;
+    var q = qs[idx];
+    $("#qNum").textContent = idx + 1;
+    $("#scoreNow").textContent = score;
+    $("#streakNow").textContent = streak;
+    $("#bar").style.width = (idx / qs.length * 100) + "%";
+    $("#qText").innerHTML = qHTML(q);
+    $("#qText").className = q.type === "trick" ? "question long" : "question";
+    var fb = $("#feedback");
+    fb.className = "feedback empty";
+    fb.innerHTML = "";
+    var inp = $("#answer");
+    inp.value = "";
+    inp.disabled = false;
+    $("#submitBtn").textContent = "Prüfen";
+    inp.focus();
+    tick();
+  }
+
+  function squareSVG(n) {
+    var p = "";
+    for (var i = 0; i <= n; i++) p += "M" + i + " 0V" + n + "M0 " + i + "H" + n;
+    return "<svg viewBox=\"-0.05 -0.05 " + (n + 0.1) + " " + (n + 0.1) + "\" aria-hidden=\"true\">" +
+      "<path d=\"" + p + "\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1\" vector-effect=\"non-scaling-stroke\" opacity=\".45\"/>" +
+      "</svg>";
+  }
+
+  function submit() {
+    if (answered) { next(); return; }
+    var raw = $("#answer").value.trim();
+    if (raw === "" || !/^\d+$/.test(raw)) return;
+    var given = parseInt(raw, 10);
+    var q = qs[idx];
+    var right = answerOf(q);
+    var fb = $("#feedback");
+    answered = true;
+    $("#answer").disabled = true;
+
+    var explain;
+    if (q.type === "trick") {
+      explain = "<div class=\"explain text\"><p>Rechenweg: " + q.how + "</p></div>";
+    } else {
+      explain = "<div class=\"explain\">" + squareSVG(q.n) +
+        "<p>Ein Quadrat mit Seitenlänge " + q.n + " hat die Fläche " + q.n + " · " + q.n + " = " + (q.n * q.n) + ".</p></div>";
+    }
+
+    if (given === right) {
+      score++; streak++;
+      if (streak > bestStreak) bestStreak = streak;
+      fb.className = "feedback good";
+      fb.innerHTML = "Richtig! " + qPlain(q) + " = " + right;
+      $("#scoreNow").textContent = score;
+      $("#streakNow").textContent = streak;
+      nextId = setTimeout(next, 900);
+    } else {
+      streak = 0;
+      wrong.push({ q: q, given: given });
+      fb.className = "feedback bad";
+      fb.innerHTML = "Nicht ganz. Richtig ist: " + qPlain(q) + " = " + right + explain;
+      $("#streakNow").textContent = streak;
+    }
+    $("#submitBtn").textContent = "Weiter";
+    $("#submitBtn").focus();
+  }
+
+  function next() {
+    clearTimeout(nextId);
+    idx++;
+    if (idx >= qs.length) finish(); else renderQuestion();
+  }
+
+  function finish() {
+    clearInterval(timerId);
+    var secs = Math.floor((Date.now() - startTime) / 1000);
+    var total = qs.length;
+    $("#resScore").textContent = score;
+    $("#resTotal").textContent = total;
+    $("#resTime").textContent = fmt(secs);
+    $("#resStreak").textContent = bestStreak;
+
+    var ratio = score / total;
+    var msg;
+    if (ratio === 1) msg = "Alles richtig. Stark!";
+    else if (ratio >= 0.8) msg = "Sehr gut. Nur noch ein paar Zahlen festigen.";
+    else if (ratio >= 0.5) msg = "Guter Anfang. Schau dir die Fehler unten an und probiere es nochmal.";
+    else msg = "Das wird mit Übung besser. Die Tabelle auf der Startseite hilft dir beim Lernen.";
+    $("#resMsg").textContent = msg;
+
+    var badge = $("#resBadge");
+    badge.hidden = true;
+    if (!retryMode) {
+      var best = loadBest();
+      if (!best || score > best.score || (score === best.score && secs < best.time)) {
+        saveBest({ score: score, time: secs });
+        badge.textContent = "Neuer Bestwert";
+        badge.hidden = false;
+      }
+    }
+
+    var list = $("#mistakes");
+    list.innerHTML = "";
+    wrong.forEach(function (w) {
+      var li = document.createElement("li");
+      var left = document.createElement("span");
+      left.textContent = qPlain(w.q) + " = ";
+      var g = document.createElement("span");
+      g.className = "given";
+      g.textContent = w.given;
+      left.appendChild(g);
+      var r = document.createElement("span");
+      r.className = "right";
+      r.textContent = answerOf(w.q);
+      li.appendChild(left);
+      li.appendChild(r);
+      list.appendChild(li);
+    });
+    $("#mistakeBox").hidden = wrong.length === 0;
+    $("#retryBtn").hidden = wrong.length === 0;
+    show("result");
+  }
+
+  /* Ereignisse */
+  $("#startBtn").addEventListener("click", function () {
+    retryMode = false;
+    startRound(buildQuestions());
+  });
+  $("#answerForm").addEventListener("submit", function (e) {
+    e.preventDefault();
+    submit();
+  });
+  $("#quitBtn").addEventListener("click", function () {
+    clearInterval(timerId);
+    clearTimeout(nextId);
+    showBest();
+    show("menu");
+  });
+  $("#againBtn").addEventListener("click", function () {
+    retryMode = false;
+    startRound(buildQuestions());
+  });
+  $("#retryBtn").addEventListener("click", function () {
+    retryMode = true;
+    var list = wrong.map(function (w) { return w.q; });
+    startRound(shuffle(list));
+  });
+  $("#menuBtn").addEventListener("click", function () {
+    showBest();
+    show("menu");
+  });
+
+  showBest();
+})();
+</script>
+</body>
+</html>
